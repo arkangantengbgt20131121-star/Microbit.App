@@ -1292,7 +1292,7 @@
     html[data-theme="mono"] .card-head h2::after { content: none; }
     * { transition: none !important; }
   }
-  /* ---------- v3.0: statistik sesi, perintah manual, gamepad, tur ---------- */
+  /* ---------- v3.0: statistik sesi, perintah manual, gamepad ---------- */
   .sess-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .sess-grid { display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono); font-size: 12px; }
   .sess-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 6px; padding: 5px 8px; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); }
@@ -1304,17 +1304,6 @@
   .cmd-form input { flex: 1; min-width: 0; background: var(--log-bg); border: 1px solid var(--log-border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font-mono); font-size: 12.5px; padding: 8px 10px; }
   .cmd-form input:disabled { opacity: 0.5; }
   .cmd-form input:focus { outline: none; border-color: var(--accent-dim); }
-  .tour-overlay { position: fixed; inset: 0; z-index: 200; }
-  .tour-overlay[hidden] { display: none; }
-  .tour-ring { position: fixed; border: 2px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.55), 0 0 18px rgba(var(--accent-rgb),0.8); transition: all 0.25s ease; pointer-events: none; }
-  .tour-tip { position: fixed; width: 300px; max-width: calc(100vw - 24px); background: var(--panel-hi); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
-  .tour-tip h3 { margin: 0 0 6px; font-size: 14px; }
-  .tour-tip p { margin: 0 0 10px; font-size: 13px; color: var(--text-muted); line-height: 1.55; }
-  .tour-count { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
-  .tour-actions { display: flex; gap: 8px; justify-content: flex-end; }
-  @media (prefers-reduced-motion: reduce) {
-    .tour-ring { transition: none; }
-  }
 </style>
 </head>
 <body>
@@ -1766,13 +1755,12 @@
             <li><strong>Suara notifikasi</strong> (konek / putus / gagal) bisa dinyalakan–dimatikan di Pengaturan → Alarm &amp; Notifikasi.</li>
             <li><strong>Export / Impor pengaturan</strong> di Pengaturan → Reset untuk memindahkan konfigurasi antar perangkat atau sebagai cadangan.</li>
           </ul>
-          <h3 style="margin-top:16px;">Statistik sesi, gamepad &amp; tur</h3>
+          <h3 style="margin-top:16px;">Statistik sesi &amp; gamepad</h3>
           <ul>
             <li><strong>Statistik Sesi</strong> (kartu Input) menampilkan min / maks / rata-rata suhu &amp; kelembaban — cocok untuk laporan praktikum. Otomatis di-reset setiap koneksi baru.</li>
             <li><strong>Gamepad USB</strong>: colok stik lalu pakai D-Pad / analog kiri untuk menggerakkan robot. Statusnya tampil di bawah Control Pad.</li>
             <li><strong>Notifikasi latar</strong> (Pengaturan &rarr; Alarm): peringatan sistem + getar + judul berkedip saat alarm bunyi dan tab tidak aktif.</li>
             <li><strong>Jaga layar menyala</strong> (Pengaturan &rarr; Koneksi): cegah layar HP mati selama monitoring lama.</li>
-            <li>Baru pertama kali buka? Ikuti <strong>tur panduan</strong> otomatis, atau ulangi kapan saja dari Pengaturan &rarr; Tentang.</li>
           </ul>
         </div>
 
@@ -2172,13 +2160,6 @@ while True:
               <li><span>Grafik</span><span>Chart.js</span></li>
               <li><span>Pembuat</span><span>Ark</span></li>
             </ul>
-            <div class="set-row" style="margin-top:10px;">
-              <div class="set-text">
-                <span class="set-label">Tur panduan</span>
-                <span class="set-desc">Ulangi pengenalan fitur langkah demi langkah.</span>
-              </div>
-              <button class="icon-btn" id="tourReplayBtn" type="button">Mulai tur</button>
-            </div>
           </div>
         </div>
       </div>
@@ -2188,20 +2169,6 @@ while True:
     </div>
   </div>
 </div>
-
-<div class="tour-overlay" id="tourOverlay" hidden>
-    <div class="tour-ring" id="tourRing"></div>
-    <div class="tour-tip" id="tourTip" role="dialog" aria-label="Tur panduan">
-      <p class="tour-count" id="tourCount">1 / 5</p>
-      <h3 id="tourTitle"></h3>
-      <p id="tourText"></p>
-      <div class="tour-actions">
-        <button class="icon-btn" id="tourSkip" type="button">Lewati</button>
-        <button class="icon-btn" id="tourPrev" type="button">&larr;</button>
-        <button class="icon-btn" id="tourNext" type="button">Lanjut &rarr;</button>
-      </div>
-    </div>
-  </div>
 
 <div class="toasts" id="toasts" aria-live="polite" aria-label="Notifikasi"></div>
 
@@ -2349,11 +2316,7 @@ while True:
     resetAllBtn: $('resetAllBtn'),
     setBgNotif: $('setBgNotif'), setWakeLock: $('setWakeLock'), wakeDesc: $('wakeDesc'),
     cmdForm: $('cmdForm'), cmdInput: $('cmdInput'), cmdSendBtn: $('cmdSendBtn'),
-    gamepadStatus: $('gamepadStatus'),
-    tourOverlay: $('tourOverlay'), tourRing: $('tourRing'), tourTip: $('tourTip'),
-    tourCount: $('tourCount'), tourTitle: $('tourTitle'), tourText: $('tourText'),
-    tourPrev: $('tourPrev'), tourNext: $('tourNext'), tourSkip: $('tourSkip'),
-    tourReplayBtn: $('tourReplayBtn')
+    gamepadStatus: $('gamepadStatus')
   };
   var navItems = $all('.nav-list .nav-item');
   var pages = $all('.page');
@@ -4087,62 +4050,6 @@ while True:
     els.statRxRate.textContent = rate + ' pkt/dtk';
   }
 
-  /* ================= TUR PANDUAN ================= */
-  var TOUR_KEY = 'microbitTourSeen';
-  var TOUR_STEPS = [
-    { page: 'page-dashboard', sel: '#connectBtn', title: 'Hubungkan', text: 'Klik di sini lalu pilih \u201CBBC micro:bit\u201D untuk menghubungkan via Bluetooth.' },
-    { page: 'page-dashboard', sel: '#alarmEnabled', title: 'Alarm Suhu', text: 'Aktifkan alarm agar panel berbunyi + berkedip saat suhu melewati ambang.' },
-    { page: 'page-controlpad', sel: '.dpad', title: 'Control Pad', text: 'Tahan tombol arah (atau WASD / gamepad USB) untuk menggerakkan robot. Lepas = stop.' },
-    { page: 'page-dashboard', sel: '#themeToggleBtn', title: 'Tema', text: 'Ganti suasana sesukamu \u2014 10 tema dengan animasi berbeda-beda.' },
-    { page: 'page-dashboard', sel: '#demoBtn', title: 'Mode Demo', text: 'Tidak punya micro:bit? Jelajahi semua fitur dengan data simulasi.' }
-  ];
-  var tourIdx = -1;
-  function tourPlace(el) {
-    var r = el.getBoundingClientRect();
-    var pad = 6;
-    var ring = els.tourRing;
-    ring.style.left = Math.max(4, r.left - pad) + 'px';
-    ring.style.top = Math.max(4, r.top - pad) + 'px';
-    ring.style.width = (r.width + pad * 2) + 'px';
-    ring.style.height = (r.height + pad * 2) + 'px';
-    var tip = els.tourTip;
-    var tipW = Math.min(300, window.innerWidth - 24);
-    tip.style.left = Math.min(Math.max(12, r.left), window.innerWidth - tipW - 12) + 'px';
-    var tipH = tip.offsetHeight;
-    var top = r.bottom + pad + 12;
-    if (top + tipH > window.innerHeight - 12) top = Math.max(12, r.top - tipH - 12);
-    tip.style.top = top + 'px';
-  }
-  function tourShow(i) {
-    if (i < 0 || i >= TOUR_STEPS.length) { tourEnd(true); return; }
-    tourIdx = i;
-    var st = TOUR_STEPS[i];
-    switchToPage(st.page);
-    els.tourCount.textContent = (i + 1) + ' / ' + TOUR_STEPS.length;
-    els.tourTitle.textContent = st.title;
-    els.tourText.textContent = st.text;
-    els.tourPrev.disabled = (i === 0);
-    els.tourNext.textContent = (i === TOUR_STEPS.length - 1) ? 'Selesai \u2713' : 'Lanjut \u2192';
-    els.tourOverlay.hidden = false;
-    var el = document.querySelector(st.sel);
-    if (!el) { tourShow(i + 1); return; }
-    try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { /* abaikan */ }
-    requestAnimationFrame(function () { requestAnimationFrame(function () { tourPlace(el); }); });
-  }
-  function tourEnd(save) {
-    tourIdx = -1;
-    els.tourOverlay.hidden = true;
-    if (save) { try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) { /* abaikan */ } }
-  }
-  function tourStart() { tourShow(0); }
-  els.tourNext.addEventListener('click', function () { tourShow(tourIdx + 1); });
-  els.tourPrev.addEventListener('click', function () { tourShow(tourIdx - 1); });
-  els.tourSkip.addEventListener('click', function () { tourEnd(true); });
-  els.tourReplayBtn.addEventListener('click', function () { switchToPage('page-settings'); tourStart(); });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && tourIdx !== -1) tourEnd(true);
-  });
-
   /* ================= INIT ================= */
   chartSuhu = createChart('suhuChart', '#ff8a5c', 50);
   chartKelembaban = createChart('kelembabanChart', '#5eead4', 100);
@@ -4165,10 +4072,6 @@ while True:
   setInterval(flushCharts, CHART_FLUSH_MS);
   setInterval(padPoll, 120);
   sessRender();
-  try {
-    if (!localStorage.getItem(TOUR_KEY)) { setTimeout(tourStart, 900); }
-  } catch (e) { /* abaikan */ }
-
   if (bleStatus() === 'unsupported') {
     showBleBanner('Browser ini tidak mendukung Web Bluetooth (butuh Chrome/Edge). Kamu tetap bisa mencoba semua fitur lewat:');
   } else if (bleStatus() === 'insecure') {
