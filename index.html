@@ -1304,9 +1304,318 @@
   .cmd-form input { flex: 1; min-width: 0; background: var(--log-bg); border: 1px solid var(--log-border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font-mono); font-size: 12.5px; padding: 8px 10px; }
   .cmd-form input:disabled { opacity: 0.5; }
   .cmd-form input:focus { outline: none; border-color: var(--accent-dim); }
+
+  /* ================= FX POLISH v3.1 — lapisan visual & animasi tambahan ================= */
+
+  /* --- Ambient: cahaya aurora lembut mengambang di belakang UI --- */
+  .fx-ambient { position: fixed; inset: -18%; z-index: 0; pointer-events: none; overflow: hidden; }
+  .fx-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .55; will-change: transform; }
+  .fx-blob.b1 { width: 48vw; height: 48vw; left: -10vw; top: -12vh;
+    background: radial-gradient(circle, rgba(var(--accent-rgb), .22), transparent 65%);
+    animation: fxDrift1 26s ease-in-out infinite; }
+  .fx-blob.b2 { width: 40vw; height: 40vw; right: -8vw; top: 24vh;
+    background: radial-gradient(circle, rgba(94,234,212,.14), transparent 65%);
+    animation: fxDrift2 34s ease-in-out infinite; }
+  .fx-blob.b3 { width: 44vw; height: 44vw; left: 18vw; bottom: -18vh;
+    background: radial-gradient(circle, rgba(var(--accent-rgb), .12), transparent 70%);
+    animation: fxDrift3 40s ease-in-out infinite; }
+  html[data-theme="red"] .fx-blob, html[data-theme="mono"] .fx-blob,
+  html[data-theme="green"] .fx-blob, html[data-theme="sakura"] .fx-blob { opacity: .3; }
+  @keyframes fxDrift1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(7vw, 6vh) scale(1.16); } }
+  @keyframes fxDrift2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-8vw, 5vh) scale(.9); } }
+  @keyframes fxDrift3 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(5vw, -7vh) scale(1.12); } }
+  /* pastikan konten selalu di atas lapisan ambient */
+  .container { z-index: 1; }
+
+  /* --- Transisi antar halaman + masuk bertingkat (stagger) --- */
+  .page:not(.page-hidden) { animation: fxPageIn .45s cubic-bezier(.22, .9, .3, 1) both; }
+  @keyframes fxPageIn { from { opacity: 0; } to { opacity: 1; } }
+  .header, .sidebar { animation: fxRise .5s cubic-bezier(.2, .9, .25, 1) both; }
+  .sidebar { animation-delay: .03s; }
+  .stats .stat { animation: fxRise .5s cubic-bezier(.2, .9, .25, 1) both; }
+  .stats .stat:nth-child(2) { animation-delay: .05s; }
+  .stats .stat:nth-child(3) { animation-delay: .10s; }
+  .stats .stat:nth-child(4) { animation-delay: .15s; }
+  .stats .stat:nth-child(5) { animation-delay: .20s; }
+  .grid > .card { animation: fxRise .55s cubic-bezier(.2, .9, .25, 1) both; }
+  .grid > .card:nth-child(2) { animation-delay: .08s; }
+  .grid > .card:nth-child(3) { animation-delay: .16s; }
+  @keyframes fxRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  /* --- Kartu: terangkat + garis aksen saat hover --- */
+  .card { position: relative; transition: transform .28s cubic-bezier(.2, .8, .2, 1), box-shadow .28s ease, border-color .28s ease; }
+  .card::before { content: ""; position: absolute; top: 0; left: 22px; right: 22px; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transform: scaleX(.25); transition: opacity .3s ease, transform .3s ease; pointer-events: none; }
+  .card:hover { transform: translateY(-3px); border-color: var(--accent-dim);
+    box-shadow: 0 16px 40px rgba(0,0,0,.35), 0 0 24px rgba(var(--accent-rgb), .12); }
+  .card:hover::before { opacity: .85; transform: scaleX(1); }
+  .stat { transition: transform .25s ease, border-color .25s ease; }
+  .stat:hover { transform: translateY(-2px); border-color: var(--accent-dim); }
+
+  /* --- Tombol: kilau sapuan + micro-press --- */
+  .btn { position: relative; overflow: hidden; }
+  .btn::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.30) 50%, transparent 65%);
+    transform: translateX(-130%); transition: transform .55s ease; }
+  .btn:hover:not(:disabled)::after { transform: translateX(130%); }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn:active:not(:disabled) { transform: translateY(1px) scale(.97); }
+  .btn-primary.connected { animation: fxBreath 1.8s ease-in-out infinite; }
+  @keyframes fxBreath {
+    0%, 100% { box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 4px 14px rgba(248,113,113,.25); }
+    50% { box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 4px 22px rgba(248,113,113,.55); }
+  }
+  #demoBtn.active { animation: fxDemoBreath 2.2s ease-in-out infinite; }
+  @keyframes fxDemoBreath {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(94,234,212,.25); }
+    50% { box-shadow: 0 0 18px 2px rgba(94,234,212,.35); }
+  }
+
+  /* --- LED status: riak memancar --- */
+  .led-dot.on { animation: pulse 2s ease-in-out infinite, fxRingOn 2.2s ease-out infinite; }
+  @keyframes fxRingOn {
+    0% { box-shadow: 0 0 0 3px rgba(74,222,128,.15), 0 0 10px rgba(74,222,128,.6), 0 0 0 0 rgba(74,222,128,.5); }
+    70%, 100% { box-shadow: 0 0 0 3px rgba(74,222,128,.15), 0 0 10px rgba(74,222,128,.6), 0 0 0 11px rgba(74,222,128,0); }
+  }
+  .led-dot.busy { animation: pulse .8s ease-in-out infinite, fxBusy .8s ease-out infinite; }
+  @keyframes fxBusy {
+    0% { box-shadow: 0 0 0 3px rgba(251,191,36,.15), 0 0 10px rgba(251,191,36,.6), 0 0 0 0 rgba(251,191,36,.55); }
+    70%, 100% { box-shadow: 0 0 0 3px rgba(251,191,36,.15), 0 0 10px rgba(251,191,36,.6), 0 0 0 9px rgba(251,191,36,0); }
+  }
+  .led-dot.demo { animation: pulse 2s ease-in-out infinite, fxDemoRing 2.4s ease-out infinite; }
+  @keyframes fxDemoRing {
+    0% { box-shadow: 0 0 0 3px var(--cyan-dim), 0 0 10px var(--cyan), 0 0 0 0 rgba(94,234,212,.5); }
+    70%, 100% { box-shadow: 0 0 0 3px var(--cyan-dim), 0 0 10px var(--cyan), 0 0 0 11px rgba(94,234,212,0); }
+  }
+
+  /* --- Angka pop saat berubah (difasilitasi observer di bawah) --- */
+  .fx-pop { display: inline-block; animation: fxPop .5s cubic-bezier(.2, 1.4, .4, 1); }
+  @keyframes fxPop {
+    0% { transform: scale(1); text-shadow: 0 0 0 rgba(var(--accent-rgb), 0); }
+    30% { transform: scale(1.16); text-shadow: 0 0 14px rgba(var(--accent-rgb), .75); }
+    100% { transform: scale(1); text-shadow: 0 0 0 rgba(var(--accent-rgb), 0); }
+  }
+  .mode-badge, .readout, #lampuStatus { transition: color .3s ease, text-shadow .3s ease; }
+
+  /* --- Alarm menyala: seluruh kartu ikut berdenyut merah --- */
+  .card:has(.alarm-state.firing) { border-color: var(--danger); animation: fxAlarmCard 1.1s ease-in-out infinite; }
+  @keyframes fxAlarmCard {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(248,113,113,.35), var(--shadow); }
+    50% { box-shadow: 0 0 30px rgba(248,113,113,.5), 0 0 0 2px rgba(248,113,113,.6), var(--shadow); }
+  }
+  .alarm-state.firing { animation: fxAlarmBadge 1.1s ease-in-out infinite; }
+  @keyframes fxAlarmBadge {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .6; transform: scale(1.12); }
+  }
+
+  /* --- Baris log baru: masuk meluncur + kilat accent --- */
+  .log-line { animation: fxLogIn .4s ease both; }
+  @keyframes fxLogIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+
+  /* --- Toast: masuk memantul dari kanan + strip warna --- */
+  .toast { animation: fxToastIn .5s cubic-bezier(.18, 1.35, .4, 1) both; border-left: 3px solid var(--cyan); }
+  @keyframes fxToastIn { from { opacity: 0; transform: translateX(26px) scale(.92); } to { opacity: 1; transform: none; } }
+  .toast-success { border-left-color: var(--success); }
+  .toast-warn { border-left-color: var(--warn); }
+  .toast-error { border-left-color: var(--danger); }
+
+  /* --- D-pad: tombol menyala berdenyut saat ditahan --- */
+  .dpad-btn:not(:disabled):hover { transform: translateY(-1px) scale(1.03); }
+  .dpad-btn.active { animation: fxPadGlow 1s ease-in-out infinite alternate; }
+  @keyframes fxPadGlow {
+    from { box-shadow: 0 0 10px rgba(var(--accent-rgb), .25); }
+    to { box-shadow: 0 0 26px rgba(var(--accent-rgb), .65), 0 0 42px rgba(var(--accent-rgb), .25); }
+  }
+
+  /* --- Slider: knob membesar + halo saat diseret --- */
+  input[type=range] { transition: filter .2s ease; }
+  input[type=range]:hover { filter: drop-shadow(0 0 6px rgba(94,234,212,.3)); }
+  input[type=range]::-webkit-slider-thumb { transition: box-shadow .15s ease, transform .12s ease; }
+  input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.15);
+    box-shadow: 0 0 0 1px var(--cyan), 0 0 16px rgba(94,234,212,.45); }
+  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.25);
+    box-shadow: 0 0 0 1px var(--cyan), 0 0 0 9px rgba(94,234,212,.15), 0 0 20px rgba(94,234,212,.6); }
+
+  /* --- Header: sapuan kilau berkala --- */
+  .header::after { content: ""; position: absolute; top: -40%; bottom: -40%; left: 0; width: 38%; pointer-events: none;
+    background: linear-gradient(105deg, transparent, rgba(255,255,255,.05) 45%, rgba(255,255,255,.11) 50%, rgba(255,255,255,.05) 55%, transparent);
+    animation: fxSweep 8s ease-in-out infinite; }
+  @keyframes fxSweep {
+    0%, 55% { transform: translateX(-160%) skewX(-14deg); }
+    100% { transform: translateX(420%) skewX(-14deg); }
+  }
+
+  /* --- Menu aktif: bilah aksen di kiri --- */
+  .nav-item { position: relative; }
+  .nav-item::before { content: ""; position: absolute; left: -1px; top: 26%; bottom: 26%; width: 3px; border-radius: 999px;
+    background: var(--accent); opacity: 0; transform: scaleY(.4); transition: opacity .25s ease, transform .25s ease; }
+  .nav-item.active::before { opacity: 1; transform: scaleY(1); box-shadow: 0 0 8px rgba(var(--accent-rgb), .8); }
+  .nav-item.active { box-shadow: 0 0 18px rgba(var(--accent-rgb), .1); }
+
+  /* --- Scrollbar halus serba tema --- */
+  * { scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--track); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); background-clip: padding-box; }
+
+  /* --- Tema tanpa animasi (Noir/Terminal): matikan angkat hover kartu --- */
+  html[data-theme="mono"] .card:hover, html[data-theme="terminal"] .card:hover { transform: none; }
+
+  /* --- Hormati preferensi hemat gerak --- */
+  @media (prefers-reduced-motion: reduce) {
+    .fx-ambient { display: none; }
+    .page:not(.page-hidden), .header, .sidebar, .stats .stat, .grid > .card,
+    .log-line, .toast, .led-dot.on, .led-dot.busy, .led-dot.demo,
+    .btn-primary.connected, #demoBtn.active, .fx-pop,
+    .card:has(.alarm-state.firing), .alarm-state.firing, .dpad-btn.active, .header::after,
+    .fx-blob { animation: none !important; }
+    .card, .stat, .btn, .btn::after, .nav-item::before, .dpad-btn, input[type=range], input[type=range]::-webkit-slider-thumb { transition: none !important; }
+    .card:hover, .stat:hover, .btn:hover:not(:disabled), .dpad-btn:not(:disabled):hover { transform: none !important; }
+  }
+
+  /* ================= UI SIMPLIFY v3.2 — teks lebih sedikit, tampilan lebih rapi ================= */
+  .header { padding: 24px 26px; }
+  h1 { font-size: 1.7rem; }
+  .card { padding: 18px 20px 20px; }
+  .card-head { margin-bottom: 14px; padding-bottom: 10px; }
+  .card-head h2 { color: var(--text-muted); font-size: 12px; letter-spacing: .18em; }
+  .widget-label { font-size: 13.5px; font-weight: 600; color: var(--text); }
+  .readout { font-size: 1.9rem; }
+  .stat-value { font-size: 1.15rem; }
+
+  /* kartu & panel kaca tipis di atas ambient */
+  .card, .sidebar, .header {
+    background: color-mix(in srgb, var(--panel) 82%, transparent);
+    -webkit-backdrop-filter: blur(6px) saturate(1.15); backdrop-filter: blur(6px) saturate(1.15);
+  }
+
+  /* akordeon panduan */
+  details.fold { border: 1px solid var(--border-soft); background: var(--bg-2);
+    border-radius: var(--radius-sm); padding: 10px 14px; margin: 8px 0;
+    transition: border-color .2s ease, background .2s ease; }
+  details.fold[open] { border-color: var(--accent-dim); background: var(--panel-hi); }
+  details.fold summary { cursor: pointer; font-weight: 600; font-size: 13.5px;
+    list-style: none; display: flex; align-items: center; gap: 8px; color: var(--text); }
+  details.fold summary::-webkit-details-marker { display: none; }
+  details.fold summary::before { content: "▸"; color: var(--accent); font-size: 12px; transition: transform .2s ease; }
+  details.fold[open] summary::before { transform: rotate(90deg); }
+  details.fold summary:hover { color: var(--accent); }
+  details.fold p { margin: 8px 2px 2px; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+  .guide-card h3 { font-size: 14px; margin: 14px 0 8px; }
+  .quick-steps { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--text-muted); line-height: 1.7; }
+  .quick-steps li { margin-bottom: 4px; }
+  .guide-note { margin: 14px 0 0; font-size: 12.5px; color: var(--text-muted); }
+  @media (prefers-reduced-motion: reduce) {
+    details.fold, details.fold summary::before { transition: none !important; }
+  }
+  /* ================= GESTUR TANGAN v3.3 ================= */
+  .gest-stage {
+    position: relative; aspect-ratio: 4 / 3; max-height: 340px;
+    border-radius: 12px; overflow: hidden;
+    background: #050a14; border: 1px solid var(--border);
+  }
+  .gest-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  .gest-stage.no-mirror video { transform: none; }
+  .gest-stage.live::after {
+    content: ""; position: absolute; inset: 0; border-radius: 12px; pointer-events: none;
+    box-shadow: inset 0 0 0 2px rgba(74,222,128,.5), inset 0 0 28px rgba(74,222,128,.14);
+    animation: gestLive 2.2s ease-in-out infinite;
+  }
+  @keyframes gestLive { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+  .gest-off {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: rgba(3, 7, 15, .74); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+    color: var(--text-muted); font-size: 13px;
+  }
+  .gest-stage.live .gest-off { display: none; }
+  .gest-badge {
+    position: absolute; top: 10px; right: 10px;
+    padding: 6px 13px; border-radius: 999px;
+    background: rgba(6, 10, 18, .55); border: 1px solid rgba(var(--accent-rgb), .6);
+    color: var(--accent); font-family: var(--font-mono); font-size: 12.5px; font-weight: 700;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 0 16px rgba(var(--accent-rgb), .25);
+    max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .gest-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .gest-url {
+    flex: 1; min-width: 0;
+    background: var(--log-bg); border: 1px solid var(--log-border); border-radius: var(--radius-sm);
+    color: var(--text); font-family: var(--font-mono); font-size: 12px; padding: 9px 11px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .gest-url:focus { outline: none; border-color: var(--accent-dim); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .12); }
+  .gest-status { margin: 10px 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.55; min-height: 17px; }
+
+  .gest-top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    padding: 12px 16px; border-radius: 12px;
+    background: var(--bg-2); border: 1px solid var(--border-soft);
+    transition: border-color .25s ease, background .25s ease, box-shadow .25s ease;
+  }
+  .gest-top-label { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; letter-spacing: -.01em; }
+  .gest-top-conf { font-family: var(--font-mono); font-size: 13px; color: var(--text-dim); }
+  .gest-top.stable {
+    border-color: var(--accent-dim); background: rgba(var(--accent-rgb), .07);
+    box-shadow: 0 0 22px rgba(var(--accent-rgb), .18);
+  }
+  .gest-top.stable .gest-top-label { color: var(--accent); text-shadow: 0 0 18px rgba(var(--accent-rgb), .45); }
+  .gest-live {
+    display: flex; justify-content: space-between; margin: 8px 3px 4px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  }
+  #gestState.hot { color: var(--accent); }
+
+  .gest-bars { margin-top: 6px; }
+  .gbar { margin: 7px 0; }
+  .gbar-top { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .gbar-val { font-family: var(--font-mono); }
+  .gbar-track { height: 7px; border-radius: 999px; background: var(--track); overflow: hidden; }
+  .gbar-fill {
+    height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--cyan), var(--accent));
+    box-shadow: 0 0 10px rgba(var(--accent-rgb), .3);
+    transition: width .13s linear;
+  }
+  .gbar.on .gbar-fill { background: var(--accent); }
+  .gbar.on .gbar-top { color: var(--accent); font-weight: 600; }
+
+  .gest-tune {
+    display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px;
+    padding-top: 13px; border-top: 1px solid var(--border-soft);
+  }
+  .gest-tune input[type=range] { width: 110px; }
+  .gest-tune output { font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); min-width: 52px; }
+
+  .gmap-row { display: flex; align-items: center; gap: 10px; padding: 8px 3px; border-bottom: 1px dashed var(--border-soft); }
+  .gmap-row:last-child { border-bottom: none; }
+  .gmap-label { flex: 0 1 150px; min-width: 0; font-weight: 600; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gmap-row select {
+    flex: 1; min-width: 120px;
+    background: var(--bg-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 8px 10px; font-family: var(--font-body); font-size: 13px; cursor: pointer;
+    transition: border-color .2s ease;
+  }
+  .gmap-row select:hover { border-color: var(--text-dim); }
+  .gmap-row select:focus { outline: none; border-color: var(--accent-dim); }
+  .gmap-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+  .gmap-dot.fire { background: var(--accent); box-shadow: 0 0 10px rgba(var(--accent-rgb), .8); animation: pulse .8s ease-in-out infinite; }
+
+  @media (max-width: 720px) {
+    .gest-top-label { font-size: 1.3rem; }
+    .gmap-label { flex-basis: 100px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gest-stage.live::after, .gmap-dot.fire { animation: none; }
+  }
+
 </style>
 </head>
 <body>
+<div class="fx-ambient" aria-hidden="true"><span class="fx-blob b1"></span><span class="fx-blob b2"></span><span class="fx-blob b3"></span></div>
 
 <a class="skip-link" href="#main">Lewati ke konten</a>
 
@@ -1352,6 +1661,13 @@
           <button class="nav-item" data-page="page-controlpad" type="button">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="1.6"/><path d="M12 6v5M12 18v-5M6 12h5M18 12h-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
             Control Pad
+            <span class="nav-dot"></span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-page="page-gesture" type="button">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.5" y="6" width="13" height="12" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 11l6-3.5v9l-6-3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            Gestur
             <span class="nav-dot"></span>
           </button>
         </li>
@@ -1439,7 +1755,7 @@
         <span class="credit-label">Dibuat oleh</span>
         <div class="credit-row">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <a href="mailto:arkangantengbgt20131121@gmail.com">arkangantengbgt20131121@gmail.com</a>
+          <a href="/cdn-cgi/l/email-protection#d1b0a3bab0bfb6b0bfa5b4bfb6b3b6a5e3e1e0e2e0e0e3e091b6bcb0b8bdffb2bebc"><span class="__cf_email__" data-cfemail="a7c6d5ccc6c9c0c6c9d3c2c9c0c5c0d39597969496969596e7c0cac6cecb89c4c8ca">[email&#160;protected]</span></a>
         </div>
         <div class="credit-row">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.9 21 3 13.1 3 3.4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
@@ -1487,11 +1803,11 @@
           <span class="stat-value accent" id="statUptime">—</span>
         </div>
         <div class="stat">
-          <span class="stat-label">Data Masuk (RX)</span>
+          <span class="stat-label">Diterima (RX)</span>
           <span class="stat-value cyan" id="statRx">0</span>
         </div>
         <div class="stat">
-          <span class="stat-label">Data Keluar (TX)</span>
+          <span class="stat-label">Terkirim (TX)</span>
           <span class="stat-value orange" id="statTx">0</span>
         </div>
         <div class="stat">
@@ -1505,8 +1821,7 @@
         <div class="grid">
           <div class="card">
             <div class="card-head">
-              <h2>Input · Sensor</h2>
-              <span class="card-tag">read</span>
+              <h2>Sensor</h2>
             </div>
 
             <div class="widget" id="suhuWidget">
@@ -1527,14 +1842,14 @@
 
             <div class="widget" style="margin-bottom:18px;">
               <div class="mode-row">
-                <span class="widget-label">Mode Saat Ini</span>
+                <span class="widget-label">Mode</span>
                 <span class="mode-badge" id="modeVal">0</span>
               </div>
             </div>
 
             <div class="widget" style="margin-bottom:18px;">
               <div class="sess-head">
-                <span class="widget-label">Statistik Sesi</span>
+                <span class="widget-label">Statistik</span>
                 <button class="icon-btn" id="statResetBtn" type="button">Reset</button>
               </div>
               <div class="sess-grid" aria-live="off">
@@ -1542,13 +1857,12 @@
                 <div class="sess-row"><span class="sess-name orange">Suhu &deg;C</span><span id="statSuhuMin">—</span><span id="statSuhuMax">—</span><span id="statSuhuAvg">—</span></div>
                 <div class="sess-row"><span class="sess-name cyan">Lembab %</span><span id="statHumMin">—</span><span id="statHumMax">—</span><span id="statHumAvg">—</span></div>
               </div>
-              <p class="field-note" style="margin-top:8px;">Dihitung ulang otomatis setiap koneksi / demo baru.</p>
             </div>
 
             <div class="widget" style="margin-bottom:18px;">
               <div class="alarm-box">
                 <div class="alarm-top">
-                  <span class="widget-label">Alarm Suhu</span>
+                  <span class="widget-label">Alarm</span>
                   <span class="alarm-state" id="alarmState" aria-live="polite">NONAKTIF</span>
                 </div>
                 <div class="alarm-controls">
@@ -1556,7 +1870,7 @@
                     <input type="checkbox" id="alarmEnabled" aria-label="Aktifkan alarm suhu">
                     <span class="slider-toggle"></span>
                   </label>
-                  <label class="alarm-field">Bunyi jika suhu ≥
+                  <label class="alarm-field">Bunyi bila ≥
                     <input type="number" id="alarmThreshold" value="35" min="-40" max="85" step="0.5" aria-label="Ambang suhu derajat celcius">
                     °C
                   </label>
@@ -1569,7 +1883,7 @@
             <div class="widget" style="margin-bottom:0;">
               <div class="record-row">
                 <div>
-                  <span class="widget-label">Rekaman Sesi</span>
+                  <span class="widget-label">Rekaman</span>
                   <span class="record-count" id="recCount">0 data</span>
                 </div>
                 <div class="record-actions">
@@ -1577,19 +1891,17 @@
                   <button class="icon-btn" id="clearRecBtn" type="button">Hapus</button>
                 </div>
               </div>
-              <p class="field-note" style="margin-top:8px;">Setiap data sensor yang masuk otomatis direkam (batas bisa diubah di Pengaturan).</p>
             </div>
           </div>
 
           <div class="card">
             <div class="card-head">
-              <h2>Output · Kontrol</h2>
-              <span class="card-tag">write</span>
+              <h2>Kontrol</h2>
             </div>
 
             <div class="widget">
               <div class="control-row">
-                <span class="widget-label">Kontrol Lampu</span>
+                <span class="widget-label">Lampu</span>
                 <div class="control-right">
                   <span id="lampuStatus">MATI</span>
                   <label class="switch">
@@ -1603,7 +1915,7 @@
             <div class="widget" style="margin-bottom:18px;">
               <div class="control-row slider-widget">
                 <div class="widget-top">
-                  <span class="widget-label">Kecepatan Kipas</span>
+                  <span class="widget-label">Kipas</span>
                   <span class="readout" style="font-size:1.1rem;"><span id="kipasVal">0</span><small>/1023</small> <small id="kipasPct" style="color:var(--cyan);">0%</small></span>
                 </div>
                 <input type="range" id="kipasSlider" min="0" max="1023" step="1" value="0" disabled aria-label="Kecepatan kipas 0 sampai 1023">
@@ -1614,7 +1926,6 @@
                   <button class="preset-btn" data-kipas="768" type="button" disabled>75%</button>
                   <button class="preset-btn" data-kipas="1023" type="button" disabled>100%</button>
                 </div>
-                <p class="field-note">Perintah kipas dikirim saat slider dilepas — agar tidak membanjiri koneksi Bluetooth.</p>
               </div>
             </div>
 
@@ -1638,7 +1949,6 @@
                     °C
                   </label>
                 </div>
-                <p class="field-note">Kecepatan kipas mengikuti suhu di antara dua ambang. Menggeser slider manual mematikan mode ini.</p>
               </div>
             </div>
           </div>
@@ -1655,7 +1965,7 @@
             </div>
           </div>
           <div id="logBox" class="log-box" role="log" aria-live="off" aria-label="Log aktivitas">
-            <p class="log-empty">Log aktivitas akan muncul di sini…</p>
+            <p class="log-empty">Belum ada aktivitas.</p>
           </div>
         </div>
       </div>
@@ -1666,7 +1976,6 @@
           <div class="card dpad-card">
             <div class="card-head">
               <h2>Control Pad</h2>
-              <span class="card-tag">write</span>
             </div>
             <div class="dpad-wrap">
               <div class="dpad" role="group" aria-label="Kontrol arah">
@@ -1678,7 +1987,7 @@
               </div>
               <div class="dpad-readout">
                 <span class="dpad-status" id="dpadStatus" role="status">STOP</span>
-                <span class="dpad-hint">Tahan tombol untuk bergerak, lepas untuk mengirim “stop”. Bisa juga pakai panah / WASD / gamepad USB.</span>
+                <span class="dpad-hint">Tahan = gerak · lepas = stop · panah / WASD / gamepad</span>
                 <span class="dpad-hint" id="gamepadStatus">🎮 Gamepad: tidak terdeteksi.</span>
               </div>
             </div>
@@ -1687,7 +1996,6 @@
           <div class="card">
             <div class="card-head">
               <h2>Perintah Terakhir</h2>
-              <span class="card-tag">tx</span>
             </div>
             <p class="last-cmd" id="lastCmdVal">—</p>
             <form class="cmd-form" id="cmdForm" autocomplete="off">
@@ -1711,65 +2019,119 @@
         </div>
       </div>
 
+      <!-- ==================== GESTUR TANGAN (TEACHABLE MACHINE) ==================== -->
+      <div class="page page-hidden" id="page-gesture">
+        <div class="grid">
+
+          <div class="card gest-card">
+            <div class="card-head">
+              <h2>Kamera &amp; Model</h2>
+            </div>
+            <div class="gest-stage" id="gestStage">
+              <video id="gestVideo" autoplay playsinline muted></video>
+              <div class="gest-off" id="gestOff">Kamera mati — klik <strong>Mulai Deteksi</strong></div>
+              <div class="gest-badge" id="gestBadge" hidden>—</div>
+            </div>
+            <div class="gest-row">
+              <button class="btn btn-primary" id="gestStartBtn" type="button">▶ Mulai Deteksi</button>
+              <button class="btn btn-ghost" id="gestStopBtn" type="button" disabled>■ Stop</button>
+            </div>
+            <div class="gest-row">
+              <input type="url" class="gest-url" id="gestUrlInput" spellcheck="false"
+                     value="https://teachablemachine.withgoogle.com/models/dLWidtkCQ/"
+                     placeholder="https://teachablemachine.withgoogle.com/models/XXXXX/"
+                     aria-label="Tautan model Teachable Machine">
+              <button class="icon-btn" id="gestLoadBtn" type="button">Muat model</button>
+            </div>
+            <div class="gest-row">
+              <label class="alarm-check"><input type="checkbox" id="gestMirror" checked> Balik gambar (cermin)</label>
+            </div>
+            <p class="gest-status" id="gestStatus">Tempel tautan Teachable Machine lalu klik Mulai — atau Muat model saja.</p>
+          </div>
+
+          <div class="card gest-card">
+            <div class="card-head">
+              <h2>Hasil Deteksi</h2>
+            </div>
+            <div class="gest-top" id="gestTop">
+              <span class="gest-top-label" id="gestTopLabel">—</span>
+              <span class="gest-top-conf" id="gestTopConf">0%</span>
+            </div>
+            <div class="gest-live">
+              <span id="gestRate">0 pred/dtk</span>
+              <span id="gestState">Siaga</span>
+            </div>
+            <div class="gest-bars" id="gestBars"></div>
+            <div class="gest-tune">
+              <label class="alarm-field">Percaya ≥
+                <input type="range" id="gestConf" min="50" max="99" value="78">
+                <output id="gestConfVal">78%</output>
+              </label>
+              <label class="alarm-field">Tahan
+                <input type="range" id="gestHold" min="0" max="800" step="20" value="180">
+                <output id="gestHoldVal">0.18 dtk</output>
+              </label>
+              <label class="alarm-field">Jeda aksi
+                <input type="range" id="gestCd" min="200" max="3000" step="100" value="900">
+                <output id="gestCdVal">0.9 dtk</output>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Gerakan → Aksi</h2>
+          </div>
+          <div class="gest-map" id="gestMap"></div>
+          <div class="gest-row" style="margin-top:12px;">
+            <label class="alarm-check"><input type="checkbox" id="gestSend" checked> Kirim otomatis ke micro:bit</label>
+            <span class="gest-status" id="gestMapHint">Kelas dikenali otomatis dari model — atur aksinya di atas.</span>
+          </div>
+        </div>
+      </div>
+
       <!-- ==================== PANDUAN ==================== -->
       <div class="page page-hidden" id="page-panduan">
         <div class="card guide-card">
           <div class="card-head">
-            <h2>Petunjuk</h2>
-            <span class="card-tag">info</span>
+            <h2>Mulai Cepat</h2>
           </div>
-          <h3>Cara memakai panel ini</h3>
-          <ol>
-            <li>Flash micro:bit dengan program yang mengaktifkan <code class="inline">UART Service</code> (contoh kode di bawah).</li>
-            <li>Buka halaman ini di <strong>Chrome / Edge</strong> (HP Android atau laptop) melalui <strong>HTTPS atau localhost</strong>.</li>
-            <li>Klik <strong>Hubungkan ke Micro:bit</strong>, lalu pilih perangkat <code class="inline">BBC micro:bit […]</code>.</li>
-            <li>Setelah status <strong>Terhubung</strong>, sensor tampil otomatis dan semua kontrol aktif.</li>
-            <li>Belum punya micro:bit? Klik <strong>Mode Demo</strong> untuk mencoba semua fitur dengan data simulasi.</li>
-            <li>Semua pengaturan terpusat (koneksi, tampilan, alarm, data) tersedia di halaman <strong>Pengaturan</strong>.</li>
+          <ol class="quick-steps">
+            <li>Flash micro:bit dengan program MicroPython yang mengaktifkan <code class="inline">bluetooth.UART()</code> — lihat <strong>Contoh Kode</strong>.</li>
+            <li>Buka halaman ini di <strong>Chrome / Edge</strong> lewat <strong>HTTPS atau localhost</strong>.</li>
+            <li>Klik <strong>Hubungkan ke Micro:bit</strong>, pilih perangkatmu — data &amp; kontrol langsung aktif.</li>
+            <li>Tanpa perangkat? Klik <strong>Mode Demo</strong>. Pengaturan lengkap ada di menu <strong>Pengaturan</strong>.</li>
           </ol>
         </div>
 
         <div class="card guide-card">
           <div class="card-head">
             <h2>Fitur Sesi</h2>
-            <span class="card-tag">alarm · csv · auto</span>
           </div>
-          <h3>Alarm suhu</h3>
-          <ul>
-            <li>Aktifkan di kartu <strong>Input · Sensor</strong> (atau halaman <strong>Pengaturan</strong>), lalu atur ambang (mis. ≥ 35 °C). Alarm berbunyi + berkedip saat suhu melewati ambang, dan berhenti sendiri saat suhu turun 0,5 °C di bawah ambang (histeresis anti-berisik).</li>
-            <li>Suara memakai Web Audio browser — klik <strong>Uji bunyi</strong> sekali untuk memastikan suara keluar. Pengaturan alarm tersimpan otomatis.</li>
-          </ul>
-          <h3 style="margin-top:16px;">Rekaman &amp; Export CSV</h3>
-          <ul>
-            <li>Semua data (suhu, kelembaban, mode, lampu, kipas) otomatis direkam dengan stempel waktu — maks. 10.000 baris terakhir (bisa diubah di Pengaturan).</li>
-            <li>Klik <strong>Export CSV</strong> untuk mengunduh, lalu buka di Excel / Google Sheets untuk analisis atau laporan.</li>
-          </ul>
-          <h3 style="margin-top:16px;">Auto-reconnect &amp; penanda data basi</h3>
-          <ul>
-            <li>Aktifkan <strong>Auto-reconnect</strong> di sidebar: jika koneksi putus tiba-tiba, panel mencoba sambung ulang sendiri (maks. 12 upaya, jeda 1 dtk → 30 dtk; bisa diubah di Pengaturan). Memutus koneksi secara manual tidak memicu fitur ini.</li>
-            <li>Label kecil di samping <strong>Suhu / Kelembaban</strong> menunjukkan umur data (“baru saja”, “3 dtk lalu”). Jika lebih dari 5 detik tanpa data baru (bisa diubah di Pengaturan), angka meredup dan berlabel <strong>BASI</strong>.</li>
-          </ul>
-          <h3 style="margin-top:16px;">Kipas otomatis, suara &amp; backup</h3>
-          <ul>
-            <li><strong>Kipas Otomatis</strong> (kartu Output): kecepatan kipas mengikuti suhu secara linear di antara dua ambang. Menggeser slider manual otomatis mematikannya.</li>
-            <li><strong>Suara notifikasi</strong> (konek / putus / gagal) bisa dinyalakan–dimatikan di Pengaturan → Alarm &amp; Notifikasi.</li>
-            <li><strong>Export / Impor pengaturan</strong> di Pengaturan → Reset untuk memindahkan konfigurasi antar perangkat atau sebagai cadangan.</li>
-          </ul>
-          <h3 style="margin-top:16px;">Statistik sesi &amp; gamepad</h3>
-          <ul>
-            <li><strong>Statistik Sesi</strong> (kartu Input) menampilkan min / maks / rata-rata suhu &amp; kelembaban — cocok untuk laporan praktikum. Otomatis di-reset setiap koneksi baru.</li>
-            <li><strong>Gamepad USB</strong>: colok stik lalu pakai D-Pad / analog kiri untuk menggerakkan robot. Statusnya tampil di bawah Control Pad.</li>
-            <li><strong>Notifikasi latar</strong> (Pengaturan &rarr; Alarm): peringatan sistem + getar + judul berkedip saat alarm bunyi dan tab tidak aktif.</li>
-            <li><strong>Jaga layar menyala</strong> (Pengaturan &rarr; Koneksi): cegah layar HP mati selama monitoring lama.</li>
-          </ul>
+          <details class="fold"><summary>Alarm suhu</summary>
+            <p>Bunyi + kartu berdenyut merah saat suhu melewati ambang; berhenti sendiri saat suhu turun sedikit di bawahnya. Klik <strong>Uji bunyi</strong> sekali untuk cek suara.</p>
+          </details>
+          <details class="fold"><summary>Rekaman &amp; Export CSV</summary>
+            <p>Semua data otomatis terekam dengan stempel waktu. Klik <strong>Export CSV</strong> lalu buka di Excel / Google Sheets.</p>
+          </details>
+          <details class="fold"><summary>Auto-reconnect &amp; data basi</summary>
+            <p>Jika koneksi putus, panel menyambung ulang sendiri (aktifkan di sidebar). Data &gt; 5 detik tanpa pembaruan ditandai <strong>BASI</strong>.</p>
+          </details>
+          <details class="fold"><summary>Kipas otomatis</summary>
+            <p>Kecepatan kipas mengikuti suhu di antara dua ambang. Menggeser slider manual mematikannya.</p>
+          </details>
+          <details class="fold"><summary>Statistik, gamepad &amp; notifikasi</summary>
+            <p>Min / maks / rata-rata otomatis per sesi — praktis untuk laporan praktikum. Robot bisa dikendarai dengan gamepad USB; alarm tetap mengingatkan walau tab di latar.</p>
+          </details>
         </div>
 
         <div class="card guide-card">
           <div class="card-head">
             <h2>Format Data</h2>
-            <span class="card-tag">protocol</span>
           </div>
-          <h3>micro:bit → Web (satu baris per data, diakhiri newline)</h3>
+          <h3>micro:bit → Web</h3>
           <table class="data-table">
             <thead><tr><th>Kunci</th><th>Arti</th><th>Contoh</th></tr></thead>
             <tbody>
@@ -1780,7 +2142,7 @@
               <tr><td>kipas</td><td>Kecepatan kipas 0–1023</td><td>kipas:512</td></tr>
             </tbody>
           </table>
-          <h3 style="margin-top:16px;">Web → micro:bit (perintah)</h3>
+          <h3 style="margin-top:16px;">Web → micro:bit</h3>
           <table class="data-table">
             <thead><tr><th>Perintah</th><th>Arti</th></tr></thead>
             <tbody>
@@ -1795,9 +2157,8 @@
         <div class="card guide-card">
           <div class="card-head">
             <h2>Contoh Kode</h2>
-            <span class="card-tag">micropython</span>
           </div>
-          <h3>Program micro:bit (MicroPython) yang cocok dengan panel ini</h3>
+          <details class="fold"><summary>Program MicroPython — salin &amp; flash ke micro:bit</summary>
           <div class="code-block">
             <button class="copy-code" id="guideCopyBtn" type="button">Salin kode</button>
             <pre id="guideCode"># micro:bit - MicroPython (cocok dengan panel ini)
@@ -1855,25 +2216,26 @@ while True:
     kirim("mode:1")
     sleep(1000)</pre>
           </div>
+          </details>
         </div>
 
         <div class="card guide-card">
           <div class="card-head">
             <h2>Bantuan</h2>
-            <span class="card-tag">faq</span>
           </div>
-          <h3>Troubleshooting</h3>
-          <ul>
-            <li><strong>Tombol hubungkan tidak bisa / error:</strong> pastikan memakai Chrome/Edge terbaru, halaman dibuka via HTTPS (atau localhost), dan Bluetooth perangkat menyala.</li>
-            <li><strong>Perangkat tidak muncul:</strong> dekatkan micro:bit (&lt; 2 m), pastikan program MicroPython dengan <code class="inline">bluetooth.UART()</code> sudah di-flash, dan tidak sedang terhubung ke HP/laptop lain.</li>
-            <li><strong>Data tidak masuk:</strong> pastikan setiap baris diakhiri <code class="inline">\n</code> dengan format <code class="inline">kunci:nilai</code> persis seperti tabel di atas.</li>
-            <li><strong>GATT error / putus-putus:</strong> matikan–nyalakan Bluetooth, lupakan (forget) perangkat micro:bit di pengaturan, lalu hubungkan ulang dari panel ini. Aktifkan <strong>Auto-reconnect</strong> di sidebar agar panel mencoba sambung ulang sendiri.</li>
-          </ul>
-          <h3 style="margin-top:16px;">Dukungan browser (Web Bluetooth)</h3>
-          <ul>
-            <li><strong>Didukung:</strong> Chrome &amp; Edge (Windows, macOS, Android, ChromeOS), Opera.</li>
-            <li><strong>Belum didukung:</strong> Firefox &amp; Safari — gunakan Chrome/Edge, atau coba <strong>Mode Demo</strong>.</li>
-          </ul>
+          <details class="fold"><summary>Tombol hubungkan error / tidak bisa diklik</summary>
+            <p>Gunakan Chrome/Edge terbaru, buka lewat HTTPS atau localhost, dan nyalakan Bluetooth.</p>
+          </details>
+          <details class="fold"><summary>Perangkat tidak muncul</summary>
+            <p>Dekatkan micro:bit (&lt; 2 m), pastikan program <code class="inline">bluetooth.UART()</code> sudah di-flash, dan tidak terhubung ke perangkat lain.</p>
+          </details>
+          <details class="fold"><summary>Data tidak masuk</summary>
+            <p>Setiap baris harus berformat <code class="inline">kunci:nilai</code> dan diakhiri <code class="inline">\n</code> — persis seperti tabel Format Data.</p>
+          </details>
+          <details class="fold"><summary>Sering putus / GATT error</summary>
+            <p>Matikan–nyalakan Bluetooth, lupakan perangkat micro:bit, sambungkan ulang, lalu aktifkan <strong>Auto-reconnect</strong>.</p>
+          </details>
+          <p class="guide-note">Browser: <strong>Chrome / Edge / Opera</strong> didukung — Firefox &amp; Safari belum (gunakan Mode Demo).</p>
         </div>
       </div>
 
@@ -1883,7 +2245,6 @@ while True:
           <div class="card set-card">
             <div class="card-head">
               <h2>Koneksi Bluetooth</h2>
-              <span class="card-tag">ble</span>
             </div>
             <div class="set-row">
               <div class="set-text">
@@ -1934,7 +2295,6 @@ while True:
           <div class="card set-card">
             <div class="card-head">
               <h2>Tampilan</h2>
-              <span class="card-tag">ui</span>
             </div>
             <div class="set-row" style="flex-direction:column;align-items:stretch;gap:8px;">
               <div class="set-text"><span class="set-label">Tema</span></div>
@@ -2014,7 +2374,6 @@ while True:
           <div class="card set-card">
             <div class="card-head">
               <h2>Alarm &amp; Notifikasi</h2>
-              <span class="card-tag">alarm</span>
             </div>
             <div class="set-row">
               <div class="set-text">
@@ -2085,7 +2444,6 @@ while True:
           <div class="card set-card">
             <div class="card-head">
               <h2>Data &amp; Rekaman</h2>
-              <span class="card-tag">data</span>
             </div>
             <div class="set-row">
               <div class="set-text">
@@ -2120,7 +2478,6 @@ while True:
           <div class="card set-card">
             <div class="card-head">
               <h2>Backup &amp; Reset</h2>
-              <span class="card-tag">danger</span>
             </div>
             <div class="set-row">
               <div class="set-text">
@@ -2151,7 +2508,6 @@ while True:
           <div class="card set-card">
             <div class="card-head">
               <h2>Tentang</h2>
-              <span class="card-tag">info</span>
             </div>
             <ul class="about-list">
               <li><span>Aplikasi</span><span>micro:bit Control Panel</span></li>
@@ -2172,7 +2528,7 @@ while True:
 
 <div class="toasts" id="toasts" aria-live="polite" aria-label="Notifikasi"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -2420,6 +2776,7 @@ while True:
   var pageMeta = {
     'page-dashboard': ['Dashboard micro:bit', 'Pantau sensor & kendalikan output micro:bit.'],
     'page-controlpad': ['Control Pad', 'Kendalikan gerakan dengan D-Pad atau keyboard.'],
+    'page-gesture': ['Gestur Tangan', 'Deteksi gerakan tangan via Teachable Machine — hasil tampil real-time.'],
     'page-panduan': ['Panduan', 'Format data, contoh kode & troubleshooting.'],
     'page-settings': ['Pengaturan', 'Konfigurasi koneksi, tampilan, alarm & data.']
   };
@@ -4078,8 +4435,509 @@ while True:
     showBleBanner('Halaman ini tidak dibuka via HTTPS/localhost, sehingga Web Bluetooth diblokir browser. Sementara itu kamu bisa memakai:');
   }
 
-  logActivity('Selamat datang di micro:bit Control Panel v3.0. Klik "Hubungkan ke Micro:bit" atau aktifkan Mode Demo.', 'sys');
+  /* ================= GESTUR TANGAN — Teachable Machine + ml5 ================= */
+  var GEST_STORE = 'microbitGesture';
+  var GEST_DEFAULTS = {
+    url: 'https://teachablemachine.withgoogle.com/models/dLWidtkCQ/',
+    mirror: true, send: true,
+    conf: 0.78, holdMs: 180, cooldownMs: 900,
+    map: {}
+  };
+  var GEST_ACTIONS = {
+    none:    { text: '— (tanpa aksi)', mode: 'idle' },
+    atas:    { text: 'Gerak: naik ▲',  mode: 'hold', dir: 'atas' },
+    bawah:   { text: 'Gerak: turun ▼', mode: 'hold', dir: 'bawah' },
+    kiri:    { text: 'Gerak: kiri ◀',  mode: 'hold', dir: 'kiri' },
+    kanan:   { text: 'Gerak: kanan ▶', mode: 'hold', dir: 'kanan' },
+    stop:    { text: 'Berhenti ■',     mode: 'once' },
+    lampu:   { text: 'Lampu: nyalakan/matikan', mode: 'once' },
+    fanup:   { text: 'Kipas: +15%',    mode: 'once' },
+    fandown: { text: 'Kipas: −15%',    mode: 'once' }
+  };
+  var GEST_MIN_MS = 90; // jarak antar prediksi (~11 fps maksimum)
+  var GEST_RELEASE_GRACE = 260; // ms sebelum dianggap "lepas" (anti-kedip)
+
+  function gestReadCfg() {
+    try {
+      var raw = localStorage.getItem(GEST_STORE);
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p && typeof p === 'object') {
+          var c = Object.assign({}, GEST_DEFAULTS, p);
+          c.map = (p.map && typeof p.map === 'object') ? p.map : {};
+          return c;
+        }
+      }
+    } catch (e) { /* abaikan */ }
+    return JSON.parse(JSON.stringify(GEST_DEFAULTS));
+  }
+
+  var gest = {
+    cfg: gestReadCfg(),
+    classifier: null, modelUrl: null, mirrorApplied: null, labels: [],
+    stream: null, running: false, loading: false, inFlight: false,
+    canvas: document.createElement('canvas'),
+    rafId: 0, lastClassifyAt: 0, predCount: 0, lastRateAt: 0,
+    ema: {}, candidate: null, candidateSince: 0,
+    accepted: null, unstableSince: 0, lastActionAt: {}, sendWarned: false
+  };
+  gest.canvas.width = 224; gest.canvas.height = 224;
+  function gestSaveCfg() { try { localStorage.setItem(GEST_STORE, JSON.stringify(gest.cfg)); } catch (e) { /* abaikan */ } }
+
+  var G = {
+    stage: $('gestStage'), video: $('gestVideo'), badge: $('gestBadge'),
+    startBtn: $('gestStartBtn'), stopBtn: $('gestStopBtn'),
+    urlIn: $('gestUrlInput'), loadBtn: $('gestLoadBtn'),
+    mirror: $('gestMirror'), status: $('gestStatus'),
+    top: $('gestTop'), topLabel: $('gestTopLabel'), topConf: $('gestTopConf'),
+    rate: $('gestRate'), stateLbl: $('gestState'), bars: $('gestBars'),
+    conf: $('gestConf'), confVal: $('gestConfVal'),
+    hold: $('gestHold'), holdVal: $('gestHoldVal'),
+    cd: $('gestCd'), cdVal: $('gestCdVal'),
+    mapWrap: $('gestMap'), send: $('gestSend')
+  };
+  G.urlIn.value = gest.cfg.url;
+
+  function gestSetStatus(msg) { G.status.textContent = msg; }
+  function gestMapOf(label) {
+    var k = gest.cfg.map[label];
+    return GEST_ACTIONS[k] || GEST_ACTIONS[gestAutoMap(label)];
+  }
+  function gestAutoMap(label) {
+    var s = String(label).toLowerCase();
+    if (/stop|berhenti|diam|rest/.test(s)) return 'stop';
+    if (/(^|[^a-z])(up|atas|naik|↑)([^a-z]|$)/.test(s)) return 'atas';
+    if (/(^|[^a-z])(down|bawah|turun|↓)([^a-z]|$)/.test(s)) return 'bawah';
+    if (/(^|[^a-z])(left|kiri|←)([^a-z]|$)/.test(s)) return 'kiri';
+    if (/(^|[^a-z])(right|kanan|→)([^a-z]|$)/.test(s)) return 'kanan';
+    if (/lampu|light|led/.test(s)) return 'lampu';
+    if (/kipas|fan/.test(s)) return 'fanup';
+    return 'none';
+  }
+
+  /* --- pemuat ml5 dengan fallback CDN, tanpa memperlambat halaman utama --- */
+  var ml5Promise = null;
+  function ensureMl5() {
+    if (window.ml5) return Promise.resolve();
+    if (ml5Promise) return ml5Promise;
+    var sources = [
+      'https://cdn.jsdelivr.net/npm/ml5@1.3.1/dist/ml5.min.js',
+      'https://unpkg.com/ml5@1.3.1/dist/ml5.min.js',
+      'https://cdn.jsdelivr.net/npm/ml5@latest/dist/ml5.min.js'
+    ];
+    ml5Promise = new Promise(function (resolve, reject) {
+      (function tryNext(i) {
+        if (i >= sources.length) { reject(new Error('Gagal mengunduh ml5 — periksa koneksi internet.')); return; }
+        var s = document.createElement('script');
+        s.src = sources[i]; s.async = true;
+        s.onload = function () { window.ml5 ? resolve() : tryNext(i + 1); };
+        s.onerror = function () { tryNext(i + 1); };
+        document.head.appendChild(s);
+      })(0);
+    });
+    ml5Promise = ml5Promise.catch(function (e) { ml5Promise = null; throw e; });
+    return ml5Promise;
+  }
+
+  function gestNormalizeUrl(u) {
+    u = String(u || '').trim();
+    u = u.replace(/\/?model\.json\/?$/i, '');
+    if (u && !/\/$/.test(u)) u += '/';
+    return u;
+  }
+
+  function gestLoadModel() {
+    if (gest.loading) return Promise.resolve(false);
+    var url = gestNormalizeUrl(G.urlIn.value);
+    if (!/^https:\/\/teachablemachine\.withgoogle\.com\/models\/[A-Za-z0-9_-]+\/$/.test(url)) {
+      toast('Tautan tidak dikenali. Contoh: https://teachablemachine.withgoogle.com/models/XXXXX/', 'error');
+      return Promise.resolve(false);
+    }
+    gest.loading = true;
+    G.loadBtn.disabled = true;
+    gestSetStatus('Mengunduh model Teachable Machine… (± 15 MB, sekali saja)');
+    var clf = null;
+    return ensureMl5()
+      .then(function () {
+        return fetch(url + 'metadata.json')
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; });
+      })
+      .then(function (meta) {
+        clf = window.ml5.imageClassifier(url);
+        return (clf && clf.ready) ? clf.ready() : clf;
+      })
+      .then(function () {
+        gest.classifier = clf;
+        gest.modelUrl = url;
+        gest.mirrorApplied = gest.cfg.mirror;
+        var labels = meta && (meta.labels || meta.wordLabels);
+        if (Array.isArray(labels) && labels.length) {
+          gest.labels = labels.slice();
+        } else if (typeof clf.getLabels === 'function') {
+          try {
+            var g = clf.getLabels();
+            gest.labels = (Array.isArray(g) && g.length) ? g : ['Kelas 1'];
+          } catch (e) { gest.labels = ['Kelas 1']; }
+        } else {
+          gest.labels = ['Kelas 1'];
+        }
+        gest.ema = {};
+        gestRenderBars();
+        gestRenderMap();
+        gest.loading = false;
+        G.loadBtn.disabled = false;
+        G.urlIn.value = url;
+        gest.cfg.url = url; gestSaveCfg();
+        gestSetStatus('Model siap — ' + gest.labels.length + ' kelas: ' + gest.labels.join(', ') + '.');
+        toast('Model gestur dimuat (' + gest.labels.length + ' kelas).', 'success');
+        return true;
+      })
+      .catch(function (err) {
+        gest.loading = false;
+        G.loadBtn.disabled = false;
+        gestSetStatus('Gagal memuat model: ' + (err && err.message ? err.message : err));
+        toast('Gagal memuat model — periksa tautan & koneksi.', 'error');
+        return false;
+      });
+  }
+
+  /* --- kamera --- */
+  function gestStartCam() {
+    if (gest.stream) return Promise.resolve(true);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast('Kamera butuh izin & halaman HTTPS/localhost.', 'error');
+      return Promise.resolve(false);
+    }
+    return navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+      audio: false
+    }).then(function (st) {
+      gest.stream = st;
+      G.video.srcObject = st;
+      return G.video.play().then(function () { return true; }, function () { return true; });
+    }).catch(function (err) {
+      toast('Kamera ditolak browser: ' + (err && err.name ? err.name : 'izin tidak diberikan'), 'error');
+      return false;
+    });
+  }
+  function gestStopCam() {
+    if (gest.stream) { gest.stream.getTracks().forEach(function (t) { t.stop(); }); gest.stream = null; }
+    G.video.srcObject = null;
+  }
+
+  function gestGrabFrame() {
+    var v = G.video;
+    if (!v.videoWidth) return false;
+    var x = gest.canvas.getContext('2d');
+    x.save();
+    if (gest.cfg.mirror) { x.translate(gest.canvas.width, 0); x.scale(-1, 1); }
+    x.drawImage(v, 0, 0, gest.canvas.width, gest.canvas.height);
+    x.restore();
+    return true;
+  }
+
+  /* --- klasifikasi: dukung gaya callback & promise (anti-perbedaan versi ml5) --- */
+  function gestClassify() {
+    return new Promise(function (resolve, reject) {
+      var settled = false;
+      function done(err, res) { if (settled) return; settled = true; err ? reject(err) : resolve(res); }
+      var ret;
+      try { ret = gest.classifier.classify(gest.canvas, done); }
+      catch (e) { done(e); return; }
+      if (ret && typeof ret.then === 'function') ret.then(function (r) { done(null, r); }, done);
+    });
+  }
+
+  /* --- loop deteksi --- */
+  function gestLoop(ts) {
+    if (!gest.running) return;
+    if (!gest.inFlight && gest.classifier && ts - gest.lastClassifyAt >= GEST_MIN_MS) {
+      if (gestGrabFrame()) {
+        gest.lastClassifyAt = ts;
+        gest.inFlight = true;
+        gestClassify()
+          .then(function (results) { if (Array.isArray(results) && results.length) gestHandle(results, ts); })
+          .catch(function () { /* error sesaat: lewati frame ini */ })
+          .then(function () { gest.inFlight = false; });
+      }
+    }
+    if (ts - gest.lastRateAt >= 1000) {
+      G.rate.textContent = gest.predCount + ' pred/dtk';
+      gest.predCount = 0; gest.lastRateAt = ts;
+    }
+    gest.rafId = requestAnimationFrame(gestLoop);
+  }
+
+  /* --- inti akurasi: voting streak + ambang percaya + histeresis + cooldown --- */
+  function gestHandle(results, ts) {
+    var conf = gest.cfg.conf;
+    var top = results[0];
+    if (top.confidence < conf) top = null;   // tidak meyakinkan → anggap "tanpa gesture"
+    gest.predCount++;
+
+    // EMA per kelas untuk bar yang stabil
+    var byLabel = {};
+    for (var i = 0; i < results.length; i++) byLabel[results[i].label] = results[i].confidence;
+    for (var j = 0; j < gest.labels.length; j++) {
+      var lb = gest.labels[j];
+      var raw = byLabel[lb] || 0;
+      gest.ema[lb] = (gest.ema[lb] == null ? raw : gest.ema[lb] * 0.6 + raw * 0.4);
+    }
+    gestRenderValues(top ? top.label : null, results, conf);
+
+    var now = ts || performance.now();
+    var label = top ? top.label : null;
+
+    if (label) {
+      if (gest.candidate !== label) { gest.candidate = label; gest.candidateSince = now; }
+      else if (!gest.accepted && now - gest.candidateSince >= gest.cfg.holdMs) {
+        var last = gest.lastActionAt[label] || 0;
+        if (now - last >= gest.cfg.cooldownMs) gestAccept(label, top.confidence);
+      }
+      gest.unstableSince = 0;
+    } else if (!gest.accepted) {
+      gest.candidate = null;
+    }
+    if (!gest.accepted && !label) gest.candidate = null;
+
+    // pelepasan: top bukan-lagi label (atau di bawah ambang - histeresis) selama GEST_RELEASE_GRACE
+    if (gest.accepted) {
+      var still = results[0] && results[0].label === gest.accepted && results[0].confidence >= conf - 0.06;
+      if (!still) {
+        if (!gest.unstableSince) gest.unstableSince = now;
+        else if (now - gest.unstableSince > GEST_RELEASE_GRACE) gestRelease(true);
+      } else gest.unstableSince = 0;
+    }
+
+    G.stateLbl.textContent = gest.accepted ? 'AKTIF: ' + gest.accepted
+      : (gest.candidate ? 'menahan…' : (label ? 'siap: ' + label : 'mencari…'));
+    G.stateLbl.classList.toggle('hot', !!gest.accepted);
+  }
+
+  function gestAccept(label, confidence) {
+    var act = gestMapOf(label);
+    gest.accepted = label;
+    gest.lastActionAt[label] = performance.now();
+    G.badge.textContent = label + (act.mode === 'idle' ? '' : ' ✓');
+    G.badge.hidden = false;
+    G.top.classList.add('stable');
+    G.topLabel.textContent = label;
+    var canCtrl = canControl();
+    if (act.mode === 'hold' && canCtrl) {
+      dpadPress(act.dir);          // D-pad bercahaya + kirim arah
+    } else if (act.mode === 'once') {
+      gestDoOnce(act);
+    } else if (act.mode !== 'idle' && !canCtrl) {
+      gestOfflineWarn();
+    }
+    logActivity('Gerakan ' + label + ' (' + Math.round(confidence * 100) + '%) → ' + act.text, act.mode === 'idle' ? 'info' : 'sys');
+    var dot = G._dots && G._dots[label];
+    if (dot) { dot.classList.add('fire'); setTimeout(function () { dot.classList.remove('fire'); }, 500); }
+  }
+
+  function gestRelease(sendStop) {
+    if (!gest.accepted) return;
+    var act = gestMapOf(gest.accepted);
+    if (sendStop && act.mode === 'hold') dpadRelease(); // kirim "stop" sekali, persis seperti melepas tombol
+    gest.accepted = null;
+    gest.unstableSince = 0;
+    G.top.classList.remove('stable');
+    G.badge.hidden = true;
+    G.topLabel.textContent = gest.candidate || '—';
+  }
+
+  function gestOfflineWarn() {
+    if (gest.cfg.send) {
+      if (!gest.sendWarned) {
+        gest.sendWarned = true;
+        toast('Gerakan terdeteksi — tapi micro:bit belum terhubung (hasil hanya ditampilkan).', 'warn');
+      }
+      logActivity('Gerakan ' + gest.accepted + ' tidak dikirim: belum terhubung.', 'warn');
+    }
+  }
+
+  function gestDoOnce(act) {
+    if (!canControl()) { gestOfflineWarn(); return; }
+    if (act === GEST_ACTIONS.stop) {
+      dpadRelease();
+    } else if (act === GEST_ACTIONS.lampu) {
+      var on = !els.lampuSwitch.checked;
+      setLampuUI(on);
+      sendData('lampu:' + (on ? 1 : 0));
+    } else if (act === GEST_ACTIONS.fanup || act === GEST_ACTIONS.fandown) {
+      var cur = Number(els.kipasSlider.value) || 0;
+      var v = Math.max(0, Math.min(1023, cur + (act === GEST_ACTIONS.fanup ? 154 : -154)));
+      if (state.fan.enabled) setFanAuto(false, true);
+      els.kipasSlider.value = v;
+      setKipasUI(v);
+      sendData('kipas:' + v);
+    }
+  }
+
+  /* --- rendering UI --- */
+  function gestRenderBars() {
+    G.bars.innerHTML = '';
+    G._bars = {};
+    gest.labels.forEach(function (lb) {
+      var row = document.createElement('div'); row.className = 'gbar';
+      var top = document.createElement('div'); top.className = 'gbar-top';
+      var name = document.createElement('span'); name.textContent = lb;
+      var val = document.createElement('span'); val.className = 'gbar-val'; val.textContent = '0%';
+      top.appendChild(name); top.appendChild(val);
+      var track = document.createElement('div'); track.className = 'gbar-track';
+      var fill = document.createElement('div'); fill.className = 'gbar-fill';
+      track.appendChild(fill);
+      row.appendChild(top); row.appendChild(track);
+      G.bars.appendChild(row);
+      G._bars[lb] = { row: row, fill: fill, val: val };
+    });
+  }
+  function gestRenderValues(topLabel, results, conf) {
+    var byLabel = {};
+    for (var i = 0; i < results.length; i++) byLabel[results[i].label] = results[i].confidence;
+    for (var lb in G._bars) {
+      var r = G._bars[lb];
+      var sm = Math.max(0, Math.min(1, gest.ema[lb] || 0));
+      r.fill.style.width = (sm * 100).toFixed(1) + '%';
+      r.val.textContent = Math.round((byLabel[lb] || 0) * 100) + '%';
+      r.row.classList.toggle('on', lb === (topLabel || gest.candidate));
+    }
+    var t = results[0];
+    G.topConf.textContent = t ? Math.round(t.confidence * 100) + '%' : '0%';
+    if (!gest.accepted) G.topLabel.textContent = (t && t.confidence >= conf) ? t.label : '—';
+  }
+  function gestRenderMap() {
+    G.mapWrap.innerHTML = '';
+    G._dots = {};
+    if (!gest.labels.length) {
+      G.mapWrap.textContent = 'Muat model dulu untuk melihat kelas-kelasnya.';
+      return;
+    }
+    gest.labels.forEach(function (lb) {
+      var row = document.createElement('div'); row.className = 'gmap-row'; row.dataset.label = lb;
+      var dot = document.createElement('span'); dot.className = 'gmap-dot';
+      var name = document.createElement('span'); name.className = 'gmap-label'; name.textContent = lb; name.title = lb;
+      var sel = document.createElement('select');
+      Object.keys(GEST_ACTIONS).forEach(function (k) {
+        var o = document.createElement('option');
+        o.value = k; o.textContent = GEST_ACTIONS[k].text;
+        sel.appendChild(o);
+      });
+      sel.value = gest.cfg.map[lb] || gestAutoMap(lb);
+      if (gest.cfg.map[lb] == null) { gest.cfg.map[lb] = sel.value; }
+      sel.addEventListener('change', function () {
+        gest.cfg.map[lb] = sel.value;
+        gestSaveCfg();
+        if (gest.accepted === lb) { /* biar label aktif memakai aksi baru */ }
+        logActivity('Peta gestur: ' + lb + ' → ' + GEST_ACTIONS[sel.value].text, 'sys');
+      });
+      row.appendChild(dot); row.appendChild(name); row.appendChild(sel);
+      G.mapWrap.appendChild(row);
+      G._dots[lb] = dot;
+    });
+    gestSaveCfg();
+  }
+
+  /* --- kontrol start/stop --- */
+  function gestStart() {
+    if (gest.running) return;
+    var needLoad = !gest.classifier || gest.mirrorApplied !== gest.cfg.mirror;
+    var modelP = needLoad ? gestLoadModel() : Promise.resolve(true);
+    var camP = gestStartCam();
+    Promise.all([modelP, camP]).then(function (res) {
+      if (res[0] === false || res[1] === false) { gestStopCam(); return; }
+      gest.running = true;
+      G.stage.classList.add('live');
+      G.startBtn.disabled = true;
+      G.stopBtn.disabled = false;
+      gestSetStatus('Mendeteksi… angkat tanganmu ke kamera dan tahan sejenak.');
+      logActivity('Deteksi gestur dimulai (' + gest.labels.join('/') + ').', 'sys');
+      gest.rafId = requestAnimationFrame(gestLoop);
+    });
+  }
+  function gestStop() {
+    if (!gest.running) return;
+    gest.running = false;
+    cancelAnimationFrame(gest.rafId);
+    gestRelease(false);
+    G.stage.classList.remove('live');
+    G.startBtn.disabled = false;
+    G.stopBtn.disabled = true;
+    G.rate.textContent = '0 pred/dtk';
+    G.stateLbl.textContent = 'Siaga';
+    gestStopCam();
+    gestSetStatus(gest.classifier ? 'Berhenti. Model masih termuat — Mulai lagi tanpa unduh ulang.' : 'Model belum dimuat.');
+    logActivity('Deteksi gestur dihentikan.', 'sys');
+  }
+
+  /* --- wiring UI --- */
+  G.startBtn.addEventListener('click', gestStart);
+  G.stopBtn.addEventListener('click', gestStop);
+  G.loadBtn.addEventListener('click', function () { gestLoadModel(); });
+  G.mirror.addEventListener('change', function () {
+    gest.cfg.mirror = G.mirror.checked;
+    G.stage.classList.toggle('no-mirror', !G.mirror.checked);
+    gestSaveCfg();
+    if (gest.classifier) {
+      toast('Mirror diubah — memuat ulang model…', 'info');
+      gestLoadModel();
+    }
+  });
+  G.send.addEventListener('change', function () {
+    gest.cfg.send = G.send.checked; gestSaveCfg();
+    if (G.send.checked && !canControl()) toast('Catatan: perintah baru terkirim setelah terhubung / Mode Demo.', 'info');
+  });
+  function bindRange(input, out, fmt, setter) {
+    var apply = function (save) {
+      setter(Number(input.value));
+      out.textContent = fmt(Number(input.value));
+      if (save) gestSaveCfg();
+    };
+    input.addEventListener('input', function () { apply(false); });
+    input.addEventListener('change', function () { apply(true); });
+  }
+  // nilai awal dari cfg
+  G.conf.value = Math.round(gest.cfg.conf * 100);
+  G.hold.value = gest.cfg.holdMs;
+  G.cd.value = gest.cfg.cooldownMs;
+  bindRange(G.conf, G.confVal, function (v) { return v + '%'; }, function (v) { gest.cfg.conf = v / 100; });
+  bindRange(G.hold, G.holdVal, function (v) { return (v / 1000).toFixed(2) + ' dtk'; }, function (v) { gest.cfg.holdMs = v; });
+  bindRange(G.cd, G.cdVal, function (v) { return (v / 1000).toFixed(1) + ' dtk'; }, function (v) { gest.cfg.cooldownMs = v; });
+  G.confVal.textContent = Math.round(gest.cfg.conf * 100) + '%';
+  G.holdVal.textContent = (gest.cfg.holdMs / 1000).toFixed(2) + ' dtk';
+  G.cdVal.textContent = (gest.cfg.cooldownMs / 1000).toFixed(1) + ' dtk';
+  G.stage.classList.toggle('no-mirror', !gest.cfg.mirror);
+  G.mirror.checked = !!gest.cfg.mirror;
+  G.send.checked = !!gest.cfg.send;
+
+  // pengaman: tab tersembunyi / fokus hilang → lepas gesture (stop terkirim bila sedang gerak)
+  document.addEventListener('visibilitychange', function () { if (document.hidden && gest.accepted) gestRelease(true); });
+  window.addEventListener('blur', function () { if (gest.accepted) gestRelease(true); });
+
+  logActivity('Klik "Hubungkan ke Micro:bit" atau aktifkan Mode Demo untuk mulai.', 'sys');
 })();
 </script>
-</body>
+<script>
+/* FX polish (non-invasif): efek "pop" tiap kali nilai angka berubah.
+   Memakai MutationObserver, jadi tidak menyentuh logika data utama. */
+(function () {
+  'use strict';
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var targets = document.querySelectorAll('#suhuVal, #kelembabanVal, #modeVal, #statRx, #statTx');
+    Array.prototype.forEach.call(targets, function (node) {
+      new MutationObserver(function () {
+        node.classList.remove('fx-pop');
+        void node.offsetWidth; // reflow kecil untuk restart animasi
+        node.classList.add('fx-pop');
+      }).observe(node, { childList: true, characterData: true, subtree: true });
+    });
+    document.addEventListener('animationend', function (e) {
+      if (e.target && e.target.classList) e.target.classList.remove('fx-pop');
+    });
+  } catch (err) { /* browser lama tanpa MutationObserver: abaikan diam-diam */ }
+})();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a49ab834ccb94f19',t:'MTc5MTg1NjQ5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
